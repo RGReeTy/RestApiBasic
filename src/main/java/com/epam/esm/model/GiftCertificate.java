@@ -27,6 +27,6 @@ public class GiftCertificate implements Serializable {
     private LocalDateTime lastUpdateDate;
     //Duration - in days (expiration period)
     private Integer duration;
-    private List<Tag> tagList = new ArrayList<>();;
+    private List<Tag> tagList ;
 
 }

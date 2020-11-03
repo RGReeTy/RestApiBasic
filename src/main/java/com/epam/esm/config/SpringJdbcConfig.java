@@ -18,7 +18,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Configuration
 @ComponentScan("com.epam.esm")
-@EnableWebMvc
+//@EnableWebMvc
 @EnableTransactionManagement
 @PropertySources({@PropertySource("classpath:application.properties")})
 public class SpringJdbcConfig implements TransactionManagementConfigurer {
