@@ -1,24 +1,24 @@
 package com.epam.esm.service;
 
-import com.epam.esm.model.Filter;
-import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.dto.FilterDto;
+import com.epam.esm.model.dto.GiftCertificateDto;
 
 import java.util.List;
 
 public interface GiftCertificateService {
 
 
-    GiftCertificate findById(Long id);
+    GiftCertificateDto findById(Long id);
 
-    List<GiftCertificate> getAll();
+    List<GiftCertificateDto> getAll();
 
-    Long createGiftCertificate(GiftCertificate certificate);
+    Long createGiftCertificate(GiftCertificateDto certificate);
 
     void deleteGiftCertificate(Long id);
 
-    List<GiftCertificate> filterGiftCertificate(Filter filter);
+    List<GiftCertificateDto> filterGiftCertificate(FilterDto filter);
 
-    void updateGiftCertificate(GiftCertificate giftCertificate);
+    void updateGiftCertificate(GiftCertificateDto giftCertificate);
 
     void linkTagToGiftCertificate(Long certificateId, Long tagId);
 }

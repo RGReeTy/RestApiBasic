@@ -3,10 +3,14 @@ package com.epam.esm.service;
 import com.epam.esm.model.Filter;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.Tag;
+import com.epam.esm.model.dto.FilterDto;
+import com.epam.esm.model.dto.GiftCertificateDto;
+import com.epam.esm.model.dto.TagDto;
+import com.epam.esm.model.dto.mapper.FilterMapper;
+import com.epam.esm.model.dto.mapper.GiftCertificateMapper;
+import com.epam.esm.model.dto.mapper.TagMapper;
 import com.epam.esm.repo.GiftCertificateRepo;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,26 +25,39 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     private final GiftCertificateRepo giftCertificateRepo;
     private final TagService tagService;
+    private final GiftCertificateMapper giftCertificateMapper;
+    private final FilterMapper filterMapper;
+    private final TagMapper tagMapper;
 
     @Override
-    public GiftCertificate findById(Long id) {
-        return giftCertificateRepo.findById(id);
+    public GiftCertificateDto findById(Long id) {
+        return giftCertificateMapper.fromModel(giftCertificateRepo.findById(id));
     }
 
     @Override
-    public List<GiftCertificate> getAll() {
-        return new ArrayList<>(giftCertificateRepo.getAll());
+    public List<GiftCertificateDto> getAll() {
+        return giftCertificateRepo
+                .getAll()
+                .stream()
+                .map(giftCertificateMapper::fromModel)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     @Override
-    public Long createGiftCertificate(GiftCertificate giftCertificate) {
-        List<Tag> tags = giftCertificate.getTagList();
-        giftCertificate.setCreateDate(LocalDateTime.now());
-        giftCertificate.setLastUpdateDate(LocalDateTime.now());
-        Long insertedGiftCertificateId = giftCertificateRepo.create(giftCertificate);
+    public Long createGiftCertificate(GiftCertificateDto giftCertificate) {
+        List<TagDto> tags = giftCertificate.getTags();
+        GiftCertificate model = giftCertificateMapper.toModel(giftCertificate);
+        model.setCreateDate(LocalDateTime.now());
+        model.setLastUpdateDate(LocalDateTime.now());
+        Long insertedGiftCertificateId = giftCertificateRepo.create(model);
+
         if (!Objects.isNull(tags)) {
-            List<Long> insertedTagsIds = tags.stream().map(tagService::createTag).collect(Collectors.toList());
+            List<Long> insertedTagsIds = tags
+                    .stream()
+                    .map(tagService::createTag)
+                    .collect(Collectors.toList());
+
             giftCertificateRepo.insertGiftCertificateTagLink(insertedGiftCertificateId, insertedTagsIds);
         }
         return insertedGiftCertificateId;
@@ -53,17 +70,17 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificate> filterGiftCertificate(Filter filter) {
+    public List<GiftCertificateDto> filterGiftCertificate(FilterDto filterDto) {
 
-        List<GiftCertificate> certificates = new ArrayList<>();
-
+        Filter filter = filterMapper.toModel(filterDto);
+        List<GiftCertificateDto> certificates = new ArrayList<>();
         Map<GiftCertificate, List<Tag>> certificateListMap = giftCertificateRepo.filterGiftCertificate(filter);
-
         certificateListMap.forEach((k, v) -> {
-            Stream<Tag> tagStream = v.stream();
-            List<Tag> collect = tagStream.collect(Collectors.toList());
-            k.setTagList(collect);
-            certificates.add(k);
+            Stream<TagDto> tagDtoStream = v.stream().map(tagMapper::fromModelWithoutCertificate);
+            List<TagDto> collect = tagDtoStream.collect(Collectors.toList());
+            GiftCertificateDto certificateDto = giftCertificateMapper.fromModel(k);
+            certificateDto.setTags(collect);
+            certificates.add(certificateDto);
         });
 
         return certificates;
@@ -71,19 +88,13 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Transactional
     @Override
-    public void updateGiftCertificate(GiftCertificate giftCertificate) {
-
-        giftCertificate.setLastUpdateDate(LocalDateTime.now());
-        giftCertificateRepo.update(giftCertificate);
-
-        List<Tag> tags = giftCertificate.getTagList();
-
+    public void updateGiftCertificate(GiftCertificateDto giftCertificate) {
+        GiftCertificate certificate = giftCertificateMapper.toModel(giftCertificate);
+        certificate.setLastUpdateDate(LocalDateTime.now());
+        giftCertificateRepo.update(certificate);
+        List<TagDto> tags = giftCertificate.getTags();
         if (!Objects.isNull(tags)) {
-            List<Long> insertedTagsIds = tags
-                    .stream()
-                    .map(tagService::createTag)
-                    .collect(Collectors.toList());
-
+            List<Long> insertedTagsIds = tags.stream().map(tagService::createTag).collect(Collectors.toList());
             giftCertificateRepo.insertGiftCertificateTagLink(giftCertificate.getId(), insertedTagsIds);
         }
     }

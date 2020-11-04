@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -27,6 +26,6 @@ public class GiftCertificate implements Serializable {
     private LocalDateTime lastUpdateDate;
     //Duration - in days (expiration period)
     private Integer duration;
-    private List<Tag> tagList ;
+    private List<Tag> tagList;
 
 }

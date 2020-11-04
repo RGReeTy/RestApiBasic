@@ -2,10 +2,12 @@ package com.epam.esm.controller;
 
 import com.epam.esm.model.Filter;
 import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.dto.FilterDto;
+import com.epam.esm.model.dto.GiftCertificateDto;
 import com.epam.esm.service.GiftCertificateService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,20 +20,20 @@ public class GiftController {
     private final GiftCertificateService service;
 
 
-    @GetMapping("/{id}")
-    public GiftCertificate getOne(@PathVariable Long id) {
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public GiftCertificateDto getGiftCertificateById(@PathVariable Long id) {
         return service.findById(id);
     }
 
     @GetMapping
     @ResponseBody
-    public List<GiftCertificate> getAll() {
+    public List<GiftCertificateDto> getAll() {
         return service.getAll();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createGiftCertificate(@RequestBody GiftCertificate certificate) {
+    public void createGiftCertificate(@RequestBody GiftCertificateDto certificate) {
         service.createGiftCertificate(certificate);
     }
 
@@ -42,18 +44,18 @@ public class GiftController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public void updateGiftCertificate(@PathVariable("id") Long id,
-                                      @RequestBody GiftCertificate certificate) {
+                                      @RequestBody GiftCertificateDto certificate) {
         certificate.setId(id);
         service.updateGiftCertificate(certificate);
     }
 
     @GetMapping("/filter")
-    public List<GiftCertificate> GiftfilterCertificates(Filter filter) {
+    public List<GiftCertificateDto> GiftfilterCertificates(FilterDto filter) {
         return service.filterGiftCertificate(filter);
     }
 
     @PutMapping("/{certificateId}/tags/{tagId}")
-    public void GiftlinkTagToCertificate(@PathVariable("certificateId") Long certificateId, @PathVariable("tagId") Long tagId) {
+    public void GiftLinkTagToCertificate(@PathVariable("certificateId") Long certificateId, @PathVariable("tagId") Long tagId) {
         service.linkTagToGiftCertificate(certificateId, tagId);
     }
 }
